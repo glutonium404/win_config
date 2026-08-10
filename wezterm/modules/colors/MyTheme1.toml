@@ -1,0 +1,30 @@
+[colors]
+foreground = "#E5DFF4"
+background = "#262626"
+cursor_bg = "#3AFC94"
+selection_bg = "#E5FCF1"
+
+ansi = [
+  "#271B3A", # black
+  "#CD8275", # red
+  "#70A97B", # green
+  "#AC975C", # yellow
+  "#8396D1", # blue
+  "#BF7FB9", # purple
+  "#5EA5B2", # cyan
+  "#C0AFE1", # white
+]
+
+brights = [
+  "#5B4480", # bright black
+  "#DC9B90", # bright red
+  "#84BF90", # bright green
+  "#C3AC70", # bright yellow
+  "#9CACDD", # bright blue
+  "#D099CA", # bright purple
+  "#73BBC8", # bright cyan
+  "#F2EFF9", # bright white
+]
+
+[metadata]
+name = "MyTheme1"
