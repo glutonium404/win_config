@@ -21,7 +21,7 @@ config.inactive_pane_hsb = {
     brightness = 1.0,
 }
 
-config.window_background_image = wezterm.config_dir .. '/assets/wallpapers/black_gradient.png'
+config.window_background_image = wezterm.config_dir .. '/assets/wallpapers/black.png'
 config.window_background_opacity = 0.5
 
 config.window_padding = {
