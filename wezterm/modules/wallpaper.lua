@@ -5,6 +5,7 @@ wezterm.GLOBAL.wallpaper_index = wezterm.GLOBAL.wallpaper_index or 1
 ---@class WallpaperHandler
 ---@field loaded boolean
 ---@field wallpaper_dir string
+---@field cache_dir string
 ---@field wallpapers string[]
 ---@field load_wallpapers fun(self: WallpaperHandler?, path: string?): WallpaperHandler
 ---@field pick_random fun(): string?
@@ -12,27 +13,29 @@ wezterm.GLOBAL.wallpaper_index = wezterm.GLOBAL.wallpaper_index or 1
 ---@field set_prev fun(window: Window): nil
 ---@field set_at fun(window: Window, index: integer): nil
 ---@field init fun(config: Config): nil
+---@field save_to_cache fun(path: string): nil
+---@field read_cache fun(): string?
+---@field create_cache fun(): nil
 
 ---@class WallpaperHandler
 local M = {}
 
 M.loaded = false
-M.wallpaper_dir = wezterm.config_dir .. '/assets/wallpapers/'
+M.wallpaper_dir = wezterm.config_dir .. '/assets/wallpapers'
+M.cache_dir = wezterm.config_dir .. '/.cache'
 M.wallpapers = {}
 
 function M.init(config)
-    local curr_wall = M.wallpapers[1]
-    local curr_idx = wezterm.GLOBAL.wallpaper_index
-
-    if curr_idx then
-        curr_wall = M.wallpapers[curr_idx]
-    else
-        local rand = M.pick_random()
-        if rand then curr_wall = rand end
+    if #M.wallpapers <= 0 then
+        wezterm.log_error("no wallpapers loaded")
+        return
     end
+
+    local curr_wall = M.read_cache() or M.pick_random() or M.wallpapers[1]
 
     config.window_background_image = curr_wall
     config.window_background_opacity = 0.6
+    M.save_to_cache(curr_wall)
 end
 
 ---@param path string?
@@ -80,6 +83,7 @@ function M.set_next(window)
     overrides.window_background_image = M.wallpapers[next_idx]
 
     window:set_config_overrides(overrides)
+    M.save_to_cache(M.wallpapers[next_idx])
 end
 
 function M.set_prev(window)
@@ -91,6 +95,7 @@ function M.set_prev(window)
     overrides.window_background_image = M.wallpapers[prev_idx]
 
     window:set_config_overrides(overrides)
+    M.save_to_cache(M.wallpapers[prev_idx])
 end
 
 function M.set_at(window, index)
@@ -102,6 +107,43 @@ function M.set_at(window, index)
     overrides.window_background_image = M.wallpapers[index]
 
     window:set_config_overrides(overrides)
+    M.save_to_cache(M.wallpapers[index])
+end
+
+function M.save_to_cache(path)
+    local file, err = io.open(M.cache_dir .. '/wallpaper.txt', 'w')
+
+    if not file then
+        wezterm.log_error("Failed to write wallpaper tracking file: " .. tostring(err))
+    else
+        file:write(path .. '\n')
+        file:close()
+    end
+end
+
+function M.read_cache()
+    local file, err = io.open(M.cache_dir .. '/wallpaper.txt', 'r')
+
+    if not file then
+        wezterm.log_error("Failed to write wallpaper tracking file: " .. tostring(err))
+        return nil
+    end
+
+    local saved_wallpaper = file:read('*a') ---@type string
+    file:close()
+    saved_wallpaper = saved_wallpaper:gsub("%s+$", "") 
+    return saved_wallpaper
+end
+
+function M.create_cache()
+    local success, _ = pcall(wezterm.read_dir, M.cache_dir)
+    if success then return end
+
+    if wezterm.target_triple:find("windows") then
+        os.execute('if not exist "' .. M.cache_dir .. '" mkdir "' .. M.cache_dir .. '"')
+    else
+        os.execute('mkdir -p "' .. M.cache_dir .. '"')
+    end
 end
 
 return M
