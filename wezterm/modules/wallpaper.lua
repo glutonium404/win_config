@@ -45,7 +45,6 @@ function M.init(config)
     M.save_to_cache(curr_wall)
 end
 
----@param path string?
 function M:load_wallpapers(path)
     if M.loaded then return self end
 
@@ -118,6 +117,8 @@ function M.set_at(window, index)
 end
 
 function M.save_to_cache(path)
+    M.create_cache()
+
     local file, err = io.open(M.cache_dir .. '/wallpaper.txt', 'w')
 
     if not file then
@@ -129,6 +130,7 @@ function M.save_to_cache(path)
 end
 
 function M.read_cache()
+    M.create_cache()
     local file, err = io.open(M.cache_dir .. '/wallpaper.txt', 'r')
 
     if not file then
