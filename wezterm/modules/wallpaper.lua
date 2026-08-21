@@ -33,6 +33,13 @@ function M.init(config)
 
     local curr_wall = M.read_cache() or M.pick_random() or M.wallpapers[1]
 
+    for idx, path in ipairs(M.wallpapers) do
+        if path == curr_wall then
+            wezterm.GLOBAL.wallpaper_index = idx
+            break
+        end
+    end
+
     config.window_background_image = curr_wall
     config.window_background_opacity = 0.6
     M.save_to_cache(curr_wall)
@@ -47,7 +54,7 @@ function M:load_wallpapers(path)
     local files = wezterm.read_dir(M.wallpaper_dir)
 
     for _, file in ipairs(files) do
-        if file:match('%.jpg$') or file:match('%.jpeg$') or file:match('%.png$') or file:match('%.webp$') then
+        if file:lower():match('%.jpg$') or file:match('%.jpeg$') or file:match('%.png$') or file:match('%.webp$') then
             table.insert(M.wallpapers, file)
         end
     end
